@@ -1,25 +1,33 @@
 import 'reflect-metadata';
-
+import Koa from 'koa';
+import { router } from './rotures';
 import { __prod__ } from './constants';
 import { createConnection } from 'typeorm';
-import { Book } from './entities/Book';
 
-const main = async () => {
-  const connection = await createConnection();
+(async function () {
+  await createConnection();
 
-  // const book = new Book();
-  // book.author = 'Zizek';
-  // book.title = 'Socialism is when the government does stuff';
-  // book.isPublished = true;
-  // book.description = 'And the more stuff it does, the more socialism it is.';
+  const app = new Koa();
 
-  // connection.manager.save<Book>(book);
+  app.use(async (ctx: Koa.Context, next: () => Promise<any>) => {
+    try {
+      await next();
+    } catch (error) {
+      console.log('??/');
+      ctx.status = error.statusCode || error.status;
+      error.status = ctx.status;
+      ctx.body = { error };
+      ctx.app.emit('error', error, ctx);
+    }
+  });
 
-  const books = await connection.manager.find(Book);
+  app.use(router.routes());
 
-  console.log(books);
+  app.on('error', (err, ctx) => {
+    console.log('server error', err, ctx);
+  });
 
-  console.log('yes');
-};
+  app.listen(3000);
 
-main().catch((e) => console.log(e));
+  console.log('koa listening to you on 3000');
+})();

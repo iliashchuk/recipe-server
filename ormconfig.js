@@ -1,6 +1,4 @@
-const entitiesDirname = `${__dirname}/${
-  process.env.NODE_ENV !== 'production' ? 'dist' : 'src'
-}/entities/*{.ts,.js}`;
+const entitiesDirname = `${__dirname}/dist/entities/*{.ts,.js}`;
 
 module.exports = {
   type: 'postgres',
